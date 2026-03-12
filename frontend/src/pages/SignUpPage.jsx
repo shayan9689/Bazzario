@@ -1,4 +1,5 @@
 import { ArrowRight, Lock, Mail, User2 } from "lucide-react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,14 +8,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import BazzarioLogo from "@/components/branding/BazzarioLogo";
 import { AppleIcon, GoogleIcon } from "@/components/auth/SocialIcons";
+import { useStore } from "@/context/StoreContext";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const { signUp } = useStore();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    toast.success("Account created successfully");
-    navigate("/account");
+    setLoading(true);
+    try {
+      await signUp(name, email, password);
+      toast.success("Account created successfully");
+      navigate("/account");
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Unable to create account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,7 +74,7 @@ export default function SignUpPage() {
               </label>
               <div className="relative">
                 <User2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input required type="text" placeholder="Alex Johnson" className="h-12 rounded-xl pl-9" data-testid="signup-name-input" />
+                <Input required type="text" value={name} onChange={(event) => setName(event.target.value)} placeholder="Alex Johnson" className="h-12 rounded-xl pl-9" data-testid="signup-name-input" />
               </div>
             </div>
 
@@ -69,7 +84,7 @@ export default function SignUpPage() {
               </label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input required type="email" placeholder="name@example.com" className="h-12 rounded-xl pl-9" data-testid="signup-email-input" />
+                <Input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" className="h-12 rounded-xl pl-9" data-testid="signup-email-input" />
               </div>
             </div>
 
@@ -79,7 +94,7 @@ export default function SignUpPage() {
               </label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input required type="password" placeholder="Create strong password" className="h-12 rounded-xl pl-9" data-testid="signup-password-input" />
+                <Input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Create strong password" className="h-12 rounded-xl pl-9" data-testid="signup-password-input" />
               </div>
             </div>
 
@@ -88,8 +103,8 @@ export default function SignUpPage() {
               <span data-testid="signup-terms-label">I agree to Terms of Service and Privacy Policy</span>
             </label>
 
-            <Button type="submit" className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signup-submit-button">
-              Create Account <ArrowRight className="ml-2 h-4 w-4" />
+            <Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signup-submit-button">
+              {loading ? "Creating..." : "Create Account"} {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
         </div>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Minus, Plus, ShieldCheck, Truck, Undo2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,7 +9,8 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import TrustBar from "@/components/layout/TrustBar";
 import ProductCard from "@/components/product/ProductCard";
-import { initialCartItems, products } from "@/data/storeData";
+import { products } from "@/data/storeData";
+import { useStore } from "@/context/StoreContext";
 
 const shippingInfoBlocks = [
   { id: "shipping", title: "Estimate Shipping", text: "Country and zip based estimate", icon: Truck },
@@ -18,34 +19,21 @@ const shippingInfoBlocks = [
 ];
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { cart, isAuthenticated, updateCartQuantity, removeCartItem } = useStore();
+  const detailedCart = useMemo(() => cart?.items || [], [cart]);
 
-  const detailedCart = useMemo(
-    () =>
-      cartItems
-        .map((item) => {
-          const product = products.find((productItem) => productItem.id === item.id);
-          return product ? { ...item, product } : null;
-        })
-        .filter(Boolean),
-    [cartItems],
-  );
-
-  const subtotal = detailedCart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const tax = subtotal * 0.072;
-  const total = subtotal + tax;
-
-  const updateQuantity = (id, delta) => {
-    setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item)),
-    );
+  const updateQuantity = async (itemId, nextQty) => {
+    await updateCartQuantity(itemId, nextQty);
   };
 
-  const removeItem = (id) => setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = async (itemId) => {
+    await removeCartItem(itemId);
+    toast.success("Item removed from cart");
+  };
 
   return (
     <div className="app-shell" data-testid="cart-page-root">
-      <SiteHeader cartCount={cartItems.length} />
+      <SiteHeader cartCount={cart?.item_count || 0} />
 
       <main>
         <section className="container-shell py-8 md:py-12" data-testid="cart-main-section">
@@ -55,7 +43,7 @@ export default function CartPage() {
                 Shopping Cart
               </h1>
               <p className="text-zinc-500" data-testid="cart-page-subtitle">
-                You have {detailedCart.length} items in your cart
+                You have {cart?.item_count || 0} items in your cart
               </p>
             </div>
             <Link to="/shop" className="text-sm font-semibold text-blue-600" data-testid="cart-continue-shopping-link">
@@ -63,53 +51,64 @@ export default function CartPage() {
             </Link>
           </div>
 
-          <div className="grid gap-7 xl:grid-cols-[1fr_360px]">
+          {!isAuthenticated && (
+            <article className="mb-6 rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center" data-testid="cart-auth-required-card">
+              <h2 className="text-2xl font-bold" data-testid="cart-auth-required-title">Sign in to view your cart</h2>
+              <p className="mt-2 text-zinc-500" data-testid="cart-auth-required-description">Your cart syncs securely across devices after sign in.</p>
+              <Link to="/signin" data-testid="cart-auth-required-signin-link">
+                <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="cart-auth-required-signin-button">Go to Sign In</Button>
+              </Link>
+            </article>
+          )}
+
+          {isAuthenticated && (
+            <div className="grid gap-7 xl:grid-cols-[1fr_360px]">
             <div className="space-y-4" data-testid="cart-items-list">
               {detailedCart.map((item) => (
                 <motion.article
-                  key={item.id}
+                  key={item.item_id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="rounded-2xl border border-zinc-200 bg-white p-4"
-                  data-testid={`cart-item-row-${item.id}`}
+                  data-testid={`cart-item-row-${item.item_id}`}
                 >
                   <div className="grid gap-4 md:grid-cols-[130px_1fr_auto] md:items-center">
                     <img
-                      src={item.product.image}
-                      alt={item.product.name}
+                      src={item.image}
+                      alt={item.name}
                       className="h-28 w-full rounded-xl object-cover"
-                      data-testid={`cart-item-image-${item.id}`}
+                      data-testid={`cart-item-image-${item.item_id}`}
                     />
                     <div>
-                      <h2 className="text-xl font-bold" data-testid={`cart-item-name-${item.id}`}>
-                        {item.product.name}
+                      <h2 className="text-xl font-bold" data-testid={`cart-item-name-${item.item_id}`}>
+                        {item.name}
                       </h2>
-                      <p className="text-sm text-zinc-500" data-testid={`cart-item-meta-${item.id}`}>
+                      <p className="text-sm text-zinc-500" data-testid={`cart-item-meta-${item.item_id}`}>
                         {item.color} | {item.size}
                       </p>
-                      <p className="mt-1 text-sm text-emerald-600" data-testid={`cart-item-stock-${item.id}`}>
+                      <p className="mt-1 text-sm text-emerald-600" data-testid={`cart-item-stock-${item.item_id}`}>
                         In stock
                       </p>
 
-                      <div className="mt-3 flex flex-wrap items-center gap-2" data-testid={`cart-item-actions-${item.id}`}>
-                        <div className="flex items-center rounded-full border border-zinc-200" data-testid={`cart-item-quantity-control-${item.id}`}>
+                      <div className="mt-3 flex flex-wrap items-center gap-2" data-testid={`cart-item-actions-${item.item_id}`}>
+                        <div className="flex items-center rounded-full border border-zinc-200" data-testid={`cart-item-quantity-control-${item.item_id}`}>
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.id, -1)}
+                            onClick={() => updateQuantity(item.item_id, Math.max(1, item.quantity - 1))}
                             className="p-2"
-                            data-testid={`cart-item-decrease-button-${item.id}`}
+                            data-testid={`cart-item-decrease-button-${item.item_id}`}
                             aria-label="decrease quantity"
                           >
                             <Minus className="h-4 w-4" />
                           </button>
-                          <span className="px-3 text-sm font-semibold" data-testid={`cart-item-quantity-value-${item.id}`}>
+                          <span className="px-3 text-sm font-semibold" data-testid={`cart-item-quantity-value-${item.item_id}`}>
                             {item.quantity}
                           </span>
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.id, 1)}
+                            onClick={() => updateQuantity(item.item_id, item.quantity + 1)}
                             className="p-2"
-                            data-testid={`cart-item-increase-button-${item.id}`}
+                            data-testid={`cart-item-increase-button-${item.item_id}`}
                             aria-label="increase quantity"
                           >
                             <Plus className="h-4 w-4" />
@@ -118,19 +117,19 @@ export default function CartPage() {
                         <button
                           type="button"
                           className="text-sm text-zinc-500 hover:text-zinc-800"
-                          onClick={() => removeItem(item.id)}
-                          data-testid={`cart-item-remove-button-${item.id}`}
+                          onClick={() => removeItem(item.item_id)}
+                          data-testid={`cart-item-remove-button-${item.item_id}`}
                         >
                           Remove
                         </button>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold" data-testid={`cart-item-price-${item.id}`}>
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                      <p className="text-2xl font-bold" data-testid={`cart-item-price-${item.item_id}`}>
+                        ${(item.price * item.quantity).toFixed(2)}
                       </p>
-                      <p className="text-sm text-zinc-400 line-through" data-testid={`cart-item-old-price-${item.id}`}>
-                        ${(item.product.oldPrice * item.quantity).toFixed(2)}
+                      <p className="text-sm text-zinc-400 line-through" data-testid={`cart-item-old-price-${item.item_id}`}>
+                        ${(item.old_price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -159,13 +158,13 @@ export default function CartPage() {
 
               <div className="mt-4 space-y-2 border-b border-zinc-200 pb-4 text-sm">
                 <p className="flex justify-between" data-testid="cart-summary-subtotal">
-                  <span>Subtotal</span> <span>${subtotal.toFixed(2)}</span>
+                  <span>Subtotal</span> <span>${(cart?.subtotal || 0).toFixed(2)}</span>
                 </p>
                 <p className="flex justify-between" data-testid="cart-summary-shipping">
                   <span>Shipping (Standard)</span> <span>FREE</span>
                 </p>
                 <p className="flex justify-between" data-testid="cart-summary-tax">
-                  <span>Estimated Tax</span> <span>${tax.toFixed(2)}</span>
+                  <span>Estimated Tax</span> <span>${(cart?.tax || 0).toFixed(2)}</span>
                 </p>
               </div>
 
@@ -183,7 +182,7 @@ export default function CartPage() {
 
               <p className="mt-6 flex items-center justify-between text-2xl font-bold" data-testid="cart-total-value">
                 <span>Total</span>
-                <span className="text-blue-600">${total.toFixed(2)}</span>
+                <span className="text-blue-600">${(cart?.total || 0).toFixed(2)}</span>
               </p>
 
               <Link to="/checkout" data-testid="cart-checkout-link">
@@ -196,6 +195,7 @@ export default function CartPage() {
               </p>
             </aside>
           </div>
+          )}
         </section>
 
         <section className="container-shell pb-16" data-testid="cart-frequently-bought-section">

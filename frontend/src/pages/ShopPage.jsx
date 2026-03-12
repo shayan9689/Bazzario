@@ -9,6 +9,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import NewsletterBanner from "@/components/layout/NewsletterBanner";
 import { products } from "@/data/storeData";
+import { useStore } from "@/context/StoreContext";
 
 function sortProducts(list, sort) {
   const cloned = [...list];
@@ -19,8 +20,10 @@ function sortProducts(list, sort) {
 }
 
 export default function ShopPage() {
-  const categoryFilters = useMemo(() => [...new Set(products.map((product) => product.category))], []);
-  const brandFilters = useMemo(() => [...new Set(products.map((product) => product.brand))], []);
+  const { products: catalogProducts } = useStore();
+  const availableProducts = catalogProducts.length ? catalogProducts : products;
+  const categoryFilters = useMemo(() => [...new Set(availableProducts.map((product) => product.category))], [availableProducts]);
+  const brandFilters = useMemo(() => [...new Set(availableProducts.map((product) => product.brand))], [availableProducts]);
   const [selectedCategories, setSelectedCategories] = useState(["Running"]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [maxPrice, setMaxPrice] = useState(500);
@@ -30,14 +33,14 @@ export default function ShopPage() {
   const pageSize = 8;
 
   const filteredProducts = useMemo(() => {
-    const byFilter = products.filter((product) => {
+    const byFilter = availableProducts.filter((product) => {
       const categoryPass = selectedCategories.length === 0 || selectedCategories.includes(product.category);
       const brandPass = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
       const pricePass = product.price <= maxPrice;
       return categoryPass && brandPass && pricePass;
     });
     return sortProducts(byFilter, sortBy);
-  }, [selectedCategories, selectedBrands, maxPrice, sortBy]);
+  }, [availableProducts, selectedCategories, selectedBrands, maxPrice, sortBy]);
 
   const paginatedProducts = useMemo(() => {
     const start = (page - 1) * pageSize;

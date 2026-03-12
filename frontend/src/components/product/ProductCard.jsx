@@ -3,12 +3,31 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useStore } from "@/context/StoreContext";
 
 function formatCurrency(value) {
   return `$${value.toFixed(2)}`;
 }
 
 export default function ProductCard({ product, compact = false }) {
+  const { addToCart, isAuthenticated } = useStore();
+  const oldPrice = product.old_price ?? product.oldPrice ?? product.price;
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add products to cart");
+      return;
+    }
+
+    await addToCart({
+      productId: product.id,
+      quantity: 1,
+      size: product.sizes?.[0] || "US 9",
+      color: product.color_name || "Default",
+    });
+    toast.success(`${product.name} added to cart`);
+  };
+
   return (
     <motion.article
       whileHover={{ y: -8 }}
@@ -53,7 +72,7 @@ export default function ProductCard({ product, compact = false }) {
               {formatCurrency(product.price)}
             </p>
             <p className="text-xs text-zinc-500 line-through" data-testid={`product-card-old-price-${product.id}`}>
-              {formatCurrency(product.oldPrice)}
+              {formatCurrency(oldPrice)}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -71,7 +90,7 @@ export default function ProductCard({ product, compact = false }) {
               className="rounded-full bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700"
               data-testid={`product-card-add-to-cart-button-${product.id}`}
               aria-label={`add ${product.name} to cart`}
-              onClick={() => toast.success(`${product.name} added to cart`)}
+              onClick={handleAddToCart}
             >
               <ShoppingCart className="h-4 w-4" />
             </button>

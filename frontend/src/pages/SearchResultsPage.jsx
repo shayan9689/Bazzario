@@ -9,6 +9,7 @@ import TrustBar from "@/components/layout/TrustBar";
 import SiteFooter from "@/components/layout/SiteFooter";
 import ProductCard from "@/components/product/ProductCard";
 import { products } from "@/data/storeData";
+import { useStore } from "@/context/StoreContext";
 
 const ratingOptions = [4, 3, 2];
 const colorOptions = [
@@ -21,6 +22,8 @@ const colorOptions = [
 ];
 
 export default function SearchResultsPage() {
+  const { products: catalogProducts } = useStore();
+  const baseProducts = catalogProducts.length ? catalogProducts : products;
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
@@ -31,7 +34,7 @@ export default function SearchResultsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  const sneakerBase = useMemo(() => [...products], []);
+  const sneakerBase = useMemo(() => [...baseProducts], [baseProducts]);
   const categoryFilters = useMemo(() => [...new Set(sneakerBase.map((product) => product.category))], [sneakerBase]);
   const brandFilters = useMemo(() => [...new Set(sneakerBase.map((product) => product.brand))], [sneakerBase]);
 
@@ -41,7 +44,8 @@ export default function SearchResultsPage() {
       const brandPass = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
       const pricePass = product.price >= priceRange[0] && product.price <= priceRange[1];
       const ratingPass = selectedRatings.length === 0 || selectedRatings.some((rating) => product.rating >= rating);
-      const colorPass = selectedColors.length === 0 || selectedColors.includes(product.colorName);
+      const colorValue = product.color_name || product.colorName || "";
+      const colorPass = selectedColors.length === 0 || selectedColors.includes(colorValue);
       return categoryPass && brandPass && pricePass && ratingPass && colorPass;
     });
 

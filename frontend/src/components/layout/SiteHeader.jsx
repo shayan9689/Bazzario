@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { navItems } from "@/data/storeData";
 import { useThemeMode } from "@/context/ThemeContext";
+import { useStore } from "@/context/StoreContext";
 import BazzarioLogo from "@/components/branding/BazzarioLogo";
 
 const getNavClass = ({ isActive }) =>
@@ -24,7 +25,9 @@ const routeLabelMap = {
 export default function SiteHeader({ cartCount = 0 }) {
   const { pathname } = useLocation();
   const { theme, toggleTheme } = useThemeMode();
+  const { cart, isAuthenticated } = useStore();
   const routeLabel = useMemo(() => routeLabelMap[pathname] || "Product", [pathname]);
+  const totalCartCount = cart?.item_count ?? cartCount;
 
   return (
     <motion.header
@@ -76,10 +79,10 @@ export default function SiteHeader({ cartCount = 0 }) {
               className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-semibold text-white"
               data-testid="header-cart-count"
             >
-              {cartCount}
+              {totalCartCount}
             </span>
           </Link>
-          <Link to="/signin" className="rounded-full p-1 hover:bg-zinc-100" data-testid="header-profile-link" aria-label="Open account">
+          <Link to={isAuthenticated ? "/account" : "/signin"} className="rounded-full p-1 hover:bg-zinc-100" data-testid="header-profile-link" aria-label="Open account">
             <UserCircle2 className="h-7 w-7 text-zinc-700" />
           </Link>
         </div>

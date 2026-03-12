@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { CheckCircle2, Heart, Share2, ShieldCheck, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import NewsletterBanner from "@/components/layout/NewsletterBanner";
 import ProductCard from "@/components/product/ProductCard";
 import { productGallery, products, specs } from "@/data/storeData";
+import { useStore } from "@/context/StoreContext";
 
 const colorOptions = [
   { id: "black", hex: "#111827", label: "Matte Black" },
@@ -19,10 +20,37 @@ const colorOptions = [
 
 export default function ProductPage() {
   const { productId } = useParams();
-  const product = useMemo(() => products.find((item) => item.id === productId) || products[0], [productId]);
+  const navigate = useNavigate();
+  const { products: catalogProducts, addToCart, isAuthenticated } = useStore();
+  const displayProducts = catalogProducts.length ? catalogProducts : products;
+  const product = useMemo(() => displayProducts.find((item) => item.id === productId) || displayProducts[0], [productId, displayProducts]);
+  const oldPrice = product.old_price ?? product.oldPrice ?? product.price;
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
   const [selectedPackage, setSelectedPackage] = useState("us-9");
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add items to cart");
+      navigate("/signin");
+      return false;
+    }
+
+    await addToCart({
+      productId: product.id,
+      quantity: 1,
+      size: selectedPackage,
+      color: selectedColor.label,
+    });
+    toast.success(`${product.name} added to cart`);
+    return true;
+  };
+
+  const handleBuyNow = async () => {
+    const added = await handleAddToCart();
+    if (!added) return;
+    navigate("/checkout");
+  };
 
   return (
     <div className="app-shell" data-testid="product-page-root">
@@ -74,7 +102,7 @@ export default function ProductPage() {
               </h1>
               <div className="mt-4 flex items-center gap-3">
                 <p className="text-4xl font-extrabold" data-testid="product-current-price">${product.price.toFixed(2)}</p>
-                <p className="text-lg text-zinc-400 line-through" data-testid="product-old-price">${product.oldPrice.toFixed(2)}</p>
+                <p className="text-lg text-zinc-400 line-through" data-testid="product-old-price">${oldPrice.toFixed(2)}</p>
                 <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700" data-testid="product-discount-badge">
                   Save 23%
                 </span>
@@ -128,10 +156,10 @@ export default function ProductPage() {
               </p>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <Button className="h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="product-add-to-cart-button" onClick={() => toast.success(`${product.name} added to cart`)}>
+                <Button className="h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="product-add-to-cart-button" onClick={handleAddToCart}>
                   Add to Cart
                 </Button>
-                <Button variant="outline" className="h-12 rounded-full" data-testid="product-buy-now-button" onClick={() => toast.success("Proceeding to checkout") }>
+                <Button variant="outline" className="h-12 rounded-full" data-testid="product-buy-now-button" onClick={handleBuyNow}>
                   Buy Now
                 </Button>
               </div>
@@ -198,7 +226,7 @@ export default function ProductPage() {
             </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-testid="product-related-grid">
-            {products.slice(1, 5).map((item) => (
+            {displayProducts.slice(1, 5).map((item) => (
               <ProductCard key={item.id} product={item} compact />
             ))}
           </div>

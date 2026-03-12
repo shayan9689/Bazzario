@@ -9,6 +9,7 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import ProductCard from "@/components/product/ProductCard";
 import { categoryCards, heroBanner, products } from "@/data/storeData";
 import { fadeUp, staggerParent } from "@/components/shared/motion";
+import { useStore } from "@/context/StoreContext";
 
 function CategoryCard({ category }) {
   return (
@@ -33,6 +34,9 @@ function CategoryCard({ category }) {
 }
 
 export default function HomePage() {
+  const { products: catalogProducts } = useStore();
+  const displayProducts = catalogProducts.length ? catalogProducts : products;
+
   return (
     <div className="app-shell" data-testid="home-page-root">
       <SiteHeader cartCount={3} />
@@ -172,7 +176,7 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.2 }}
             className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
           >
-            {products.map((product) => (
+            {displayProducts.map((product) => (
               <motion.div key={product.id} variants={fadeUp}>
                 <ProductCard product={product} />
               </motion.div>

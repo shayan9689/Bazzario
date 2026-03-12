@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CircleCheckBig, LockKeyhole, PackageCheck, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
-import { initialCartItems, products } from "@/data/storeData";
+import { useStore } from "@/context/StoreContext";
 
 const shippingOptions = [
   { id: "standard", title: "Standard Shipping", eta: "Arrives in 4-7 business days", price: 0 },
@@ -15,31 +15,157 @@ const shippingOptions = [
 ];
 
 export default function CheckoutPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { cart, isAuthenticated, createOrder, createStripeCheckoutSession, checkStripeCheckoutStatus, loadCart } = useStore();
   const [shippingMethod, setShippingMethod] = useState("standard");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [paymentResult, setPaymentResult] = useState("");
 
-  const orderItems = useMemo(
-    () =>
-      initialCartItems
-        .map((item) => {
-          const product = products.find((p) => p.id === item.id);
-          return product ? { ...item, product } : null;
-        })
-        .filter(Boolean)
-        .slice(0, 2),
-    [],
-  );
-
-  const subtotal = orderItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = cart?.subtotal || 0;
   const shippingFee = shippingMethod === "express" ? 15 : 0;
   const tax = (subtotal + shippingFee) * 0.08;
   const discount = 20;
   const total = subtotal + shippingFee + tax - discount;
 
+  const [formState, setFormState] = useState({
+    firstName: "Alex",
+    lastName: "Johnson",
+    address: "221B Palm Street",
+    apartment: "",
+    city: "Los Angeles",
+    state: "CA",
+    zip: "90001",
+    country: "USA",
+    phone: "+1 310 555 9988",
+  });
+
+  const orderItems = useMemo(() => (cart?.items || []).slice(0, 3), [cart]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    loadCart();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId || !isAuthenticated) return;
+
+    const pollStatus = async () => {
+      let attempts = 0;
+      while (attempts < 5) {
+        attempts += 1;
+        const statusResponse = await checkStripeCheckoutStatus(sessionId);
+        if (statusResponse.payment_status === "paid") {
+          setPaymentResult("Payment successful! Your order is confirmed.");
+          toast.success("Payment successful");
+          return;
+        }
+        if (statusResponse.status === "expired" || statusResponse.status === "canceled") {
+          setPaymentResult("Payment was canceled or expired. Please try again.");
+          toast.error("Payment was not completed");
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+      setPaymentResult("Payment check timed out. Please refresh in a moment.");
+    };
+
+    pollStatus();
+  }, [searchParams, isAuthenticated, checkStripeCheckoutStatus]);
+
+  const placeOrderWithStripe = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in first");
+      navigate("/signin");
+      return;
+    }
+    if ((cart?.item_count || 0) === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    try {
+      const order = await createOrder({
+        shippingAddress: {
+          first_name: formState.firstName,
+          last_name: formState.lastName,
+          address_line1: formState.address,
+          apartment: formState.apartment,
+          city: formState.city,
+          state: formState.state,
+          postal_code: formState.zip,
+          country: formState.country,
+          phone: formState.phone,
+        },
+        paymentMethod: "stripe",
+        shippingMethod,
+      });
+
+      const session = await createStripeCheckoutSession(order.order_id);
+      window.location.href = session.url;
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Unable to initiate payment");
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
+  const placeOrderWithCOD = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in first");
+      navigate("/signin");
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    try {
+      await createOrder({
+        shippingAddress: {
+          first_name: formState.firstName,
+          last_name: formState.lastName,
+          address_line1: formState.address,
+          apartment: formState.apartment,
+          city: formState.city,
+          state: formState.state,
+          postal_code: formState.zip,
+          country: formState.country,
+          phone: formState.phone,
+        },
+        paymentMethod: "cod",
+        shippingMethod,
+      });
+      toast.success("Order placed successfully (Cash on Delivery)");
+      await loadCart();
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Unable to place COD order");
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
   return (
     <div className="app-shell" data-testid="checkout-page-root">
-      <SiteHeader cartCount={3} />
+      <SiteHeader cartCount={cart?.item_count || 0} />
 
       <main className="container-shell py-8 md:py-12" data-testid="checkout-main-section">
+        {!isAuthenticated && (
+          <article className="mb-6 rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center" data-testid="checkout-auth-required-card">
+            <h2 className="text-2xl font-bold" data-testid="checkout-auth-required-title">Please sign in to checkout</h2>
+            <p className="mt-2 text-zinc-500" data-testid="checkout-auth-required-description">Checkout and payment are available for signed-in users.</p>
+            <Link to="/signin" data-testid="checkout-auth-required-link">
+              <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="checkout-auth-required-button">Go to Sign In</Button>
+            </Link>
+          </article>
+        )}
+
+        {paymentResult && (
+          <article className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800" data-testid="checkout-payment-result-banner">
+            {paymentResult}
+          </article>
+        )}
+
         <div className="mb-4 text-sm text-zinc-500" data-testid="checkout-breadcrumb">
           <Link to="/cart" className="hover:text-zinc-900" data-testid="checkout-return-to-cart-link">
             Return to Cart
@@ -56,21 +182,21 @@ export default function CheckoutPage() {
               </h1>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <Input placeholder="First Name" data-testid="checkout-input-first-name" />
-                <Input placeholder="Last Name" data-testid="checkout-input-last-name" />
+                <Input value={formState.firstName} onChange={(event) => setFormState((prev) => ({ ...prev, firstName: event.target.value }))} placeholder="First Name" data-testid="checkout-input-first-name" />
+                <Input value={formState.lastName} onChange={(event) => setFormState((prev) => ({ ...prev, lastName: event.target.value }))} placeholder="Last Name" data-testid="checkout-input-last-name" />
                 <div className="md:col-span-2">
-                  <Input placeholder="Address" data-testid="checkout-input-address" />
+                  <Input value={formState.address} onChange={(event) => setFormState((prev) => ({ ...prev, address: event.target.value }))} placeholder="Address" data-testid="checkout-input-address" />
                 </div>
                 <div className="md:col-span-2">
-                  <Input placeholder="Apartment, suite, etc. (optional)" data-testid="checkout-input-apartment" />
+                  <Input value={formState.apartment} onChange={(event) => setFormState((prev) => ({ ...prev, apartment: event.target.value }))} placeholder="Apartment, suite, etc. (optional)" data-testid="checkout-input-apartment" />
                 </div>
-                <Input placeholder="City" data-testid="checkout-input-city" />
+                <Input value={formState.city} onChange={(event) => setFormState((prev) => ({ ...prev, city: event.target.value }))} placeholder="City" data-testid="checkout-input-city" />
                 <div className="grid grid-cols-2 gap-3">
-                  <Input placeholder="State" data-testid="checkout-input-state" />
-                  <Input placeholder="ZIP Code" data-testid="checkout-input-zip" />
+                  <Input value={formState.state} onChange={(event) => setFormState((prev) => ({ ...prev, state: event.target.value }))} placeholder="State" data-testid="checkout-input-state" />
+                  <Input value={formState.zip} onChange={(event) => setFormState((prev) => ({ ...prev, zip: event.target.value }))} placeholder="ZIP Code" data-testid="checkout-input-zip" />
                 </div>
                 <div className="md:col-span-2">
-                  <Input placeholder="Phone Number" data-testid="checkout-input-phone" />
+                  <Input value={formState.phone} onChange={(event) => setFormState((prev) => ({ ...prev, phone: event.target.value }))} placeholder="Phone Number" data-testid="checkout-input-phone" />
                 </div>
               </div>
             </article>
@@ -137,11 +263,11 @@ export default function CheckoutPage() {
 
               <div className="mt-4 space-y-3" data-testid="checkout-order-items-list">
                 {orderItems.map((item) => (
-                  <div key={item.id} className="flex gap-3" data-testid={`checkout-order-item-${item.id}`}>
-                    <img src={item.product.image} alt={item.product.name} className="h-14 w-14 rounded-lg object-cover" data-testid={`checkout-order-item-image-${item.id}`} />
+                  <div key={item.item_id} className="flex gap-3" data-testid={`checkout-order-item-${item.item_id}`}>
+                    <img src={item.image} alt={item.name} className="h-14 w-14 rounded-lg object-cover" data-testid={`checkout-order-item-image-${item.item_id}`} />
                     <div className="min-w-0">
-                      <p className="truncate font-semibold" data-testid={`checkout-order-item-name-${item.id}`}>{item.product.name}</p>
-                      <p className="text-sm text-zinc-500" data-testid={`checkout-order-item-price-${item.id}`}>${item.product.price.toFixed(2)}</p>
+                      <p className="truncate font-semibold" data-testid={`checkout-order-item-name-${item.item_id}`}>{item.name}</p>
+                      <p className="text-sm text-zinc-500" data-testid={`checkout-order-item-price-${item.item_id}`}>${item.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -164,8 +290,22 @@ export default function CheckoutPage() {
                 <Button variant="outline" data-testid="checkout-promo-apply-button" onClick={() => toast.success("Promo applied") }>Apply</Button>
               </div>
 
-              <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="checkout-place-order-button" onClick={() => toast.success("Order placed successfully") }>
-                Place Order Now
+              <Button
+                className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700"
+                data-testid="checkout-place-order-button"
+                onClick={placeOrderWithStripe}
+                disabled={isPlacingOrder || !isAuthenticated}
+              >
+                {isPlacingOrder ? "Processing..." : "Pay with Stripe"}
+              </Button>
+              <Button
+                variant="outline"
+                className="mt-3 h-12 w-full rounded-full"
+                data-testid="checkout-cod-button"
+                onClick={placeOrderWithCOD}
+                disabled={isPlacingOrder || !isAuthenticated}
+              >
+                Cash on Delivery
               </Button>
               <p className="mt-2 text-center text-xs text-zinc-500" data-testid="checkout-legal-note">
                 By clicking "Place Order Now", you agree to our Terms and Privacy Policy.

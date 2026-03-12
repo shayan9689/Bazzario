@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box, CreditCard, LogOut, MapPin, Package, Search, Settings2, User2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Box, LogOut, MapPin, Package, Search, Settings2, User2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import { accountOrderHistory, accountStats } from "@/data/storeData";
 import { useThemeMode } from "@/context/ThemeContext";
+import { useStore } from "@/context/StoreContext";
 
 const sidebarItems = [
   { id: "orders", label: "Orders", icon: Package },
@@ -21,22 +22,98 @@ const sidebarItems = [
 export default function AccountPage() {
   const [activeSection, setActiveSection] = useState("orders");
   const [orderSearch, setOrderSearch] = useState("");
-  const [marketingEnabled, setMarketingEnabled] = useState(true);
-  const [shipmentEnabled, setShipmentEnabled] = useState(true);
+  const [profileName, setProfileName] = useState("Alex Johnson");
+  const [profilePhone, setProfilePhone] = useState("+1 310 555 9988");
   const { theme, toggleTheme } = useThemeMode();
+  const { isAuthenticated, user, orders, settings, loadOrders, loadSettings, logout, updateAccountSettings, updateProfile } = useStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    loadOrders();
+    loadSettings();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileName(user.name || "");
+    setProfilePhone(user.phone || "");
+  }, [user]);
+
+  const shipmentEnabled = settings?.shipment_updates ?? true;
+  const marketingEnabled = settings?.marketing_updates ?? true;
+  const baseOrders = orders.length ? orders : accountOrderHistory;
 
   const filteredOrders = useMemo(
     () =>
-      accountOrderHistory.filter((order) => {
+      baseOrders.filter((order) => {
         const token = orderSearch.toLowerCase();
-        return order.id.toLowerCase().includes(token) || order.items.some((item) => item.name.toLowerCase().includes(token));
+        const orderId = (order.order_id || order.id || "").toLowerCase();
+        const orderItems = order.items || [];
+        return orderId.includes(token) || orderItems.some((item) => item.name.toLowerCase().includes(token));
       }),
-    [orderSearch],
+    [baseOrders, orderSearch],
   );
+
+  const stats = useMemo(() => {
+    if (!orders.length) return accountStats;
+    const active = orders.filter((order) => order.status === "pending_payment" || order.status === "shipped").length;
+    const delivered = orders.filter((order) => order.status === "confirmed").length;
+    return [
+      { id: "total-orders", label: "Total Orders", value: String(orders.length) },
+      { id: "active-shipments", label: "Active Shipments", value: String(active) },
+      { id: "delivered-items", label: "Delivered Items", value: String(delivered) },
+      { id: "account-age", label: "Account Age", value: "2 Years" },
+    ];
+  }, [orders]);
+
+  const handleSignout = () => {
+    logout();
+    toast.success("Signed out successfully");
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      await updateAccountSettings({
+        theme,
+        shipment_updates: shipmentEnabled,
+        marketing_updates: marketingEnabled,
+      });
+      toast.success("Settings saved");
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Unable to save settings");
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      await updateProfile({ name: profileName, phone: profilePhone });
+      toast.success("Profile updated");
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Unable to update profile");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="app-shell" data-testid="account-page-root">
+        <SiteHeader />
+        <main className="container-shell py-16" data-testid="account-auth-required-main">
+          <article className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center" data-testid="account-auth-required-card">
+            <h1 className="text-3xl font-bold" data-testid="account-auth-required-title">Please sign in to access your account</h1>
+            <p className="mt-2 text-zinc-500" data-testid="account-auth-required-description">Track orders, manage addresses, and control your settings after login.</p>
+            <a href="/signin" data-testid="account-auth-required-link">
+              <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="account-auth-required-button">Go to Sign In</Button>
+            </a>
+          </article>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell" data-testid="account-page-root">
-      <SiteHeader cartCount={2} />
+      <SiteHeader />
 
       <main className="container-shell py-8 md:py-10" data-testid="account-main-section">
         <div className="grid gap-7 lg:grid-cols-[240px_1fr]">
@@ -50,7 +127,7 @@ export default function AccountPage() {
                     type="button"
                     onClick={() => {
                       if (item.id === "signout") {
-                        toast.success("Signed out successfully");
+                        handleSignout();
                         return;
                       }
                       setActiveSection(item.id);
@@ -85,7 +162,7 @@ export default function AccountPage() {
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-testid="account-stats-grid">
-              {accountStats.map((stat) => (
+              {stats.map((stat) => (
                 <article key={stat.id} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900" data-testid={`account-stat-card-${stat.id}`}>
                   <p className="text-xs uppercase tracking-wide text-zinc-500" data-testid={`account-stat-title-${stat.id}`}>{stat.label}</p>
                   <p className="mt-1 text-3xl font-bold" data-testid={`account-stat-value-${stat.id}`}>{stat.value}</p>
@@ -129,65 +206,70 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {filteredOrders.map((order) => (
-                  <article key={order.id} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900" data-testid={`account-order-card-${order.id}`}>
+                {filteredOrders.map((order) => {
+                  const orderId = order.order_id || order.id;
+                  const orderDate = order.created_at ? new Date(order.created_at).toLocaleDateString() : order.date;
+                  const orderTotal = order.total;
+                  const statusLabel = order.status;
+                  return (
+                  <article key={orderId} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900" data-testid={`account-order-card-${orderId}`}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="grid gap-2 text-sm text-zinc-600 sm:grid-cols-3 sm:gap-7">
-                        <p data-testid={`account-order-date-${order.id}`}>
+                        <p data-testid={`account-order-date-${orderId}`}>
                           <span className="block text-xs uppercase tracking-wide text-zinc-400">Order Placed</span>
-                          {order.date}
+                          {orderDate}
                         </p>
-                        <p data-testid={`account-order-total-${order.id}`}>
+                        <p data-testid={`account-order-total-${orderId}`}>
                           <span className="block text-xs uppercase tracking-wide text-zinc-400">Total Amount</span>
-                          ${order.total.toFixed(2)}
+                          ${orderTotal.toFixed(2)}
                         </p>
-                        <p data-testid={`account-order-recipient-${order.id}`}>
+                        <p data-testid={`account-order-recipient-${orderId}`}>
                           <span className="block text-xs uppercase tracking-wide text-zinc-400">Ship To</span>
-                          {order.shipTo}
+                          {order.shipping_address?.first_name || order.shipTo || user?.name || "Customer"}
                         </p>
                       </div>
-                      <p className="text-sm" data-testid={`account-order-meta-${order.id}`}>
-                        Order # {order.id} <span className="ml-1 rounded-full bg-zinc-100 px-2 py-1 text-xs dark:bg-zinc-800">{order.status}</span>
+                      <p className="text-sm" data-testid={`account-order-meta-${orderId}`}>
+                        Order # {orderId} <span className="ml-1 rounded-full bg-zinc-100 px-2 py-1 text-xs dark:bg-zinc-800">{statusLabel}</span>
                       </p>
                     </div>
 
-                    <div className="mt-4 space-y-3" data-testid={`account-order-items-${order.id}`}>
-                      {order.items.map((item) => (
-                        <div key={item.id} className="grid gap-3 md:grid-cols-[74px_1fr_auto] md:items-center" data-testid={`account-order-item-${order.id}-${item.id}`}>
-                          <img src={item.image} alt={item.name} className="h-16 w-16 rounded-lg object-cover" data-testid={`account-order-item-image-${order.id}-${item.id}`} />
+                    <div className="mt-4 space-y-3" data-testid={`account-order-items-${orderId}`}>
+                      {(order.items || []).map((item) => (
+                        <div key={item.product_id || item.id} className="grid gap-3 md:grid-cols-[74px_1fr_auto] md:items-center" data-testid={`account-order-item-${orderId}-${item.product_id || item.id}`}>
+                          <img src={item.image} alt={item.name} className="h-16 w-16 rounded-lg object-cover" data-testid={`account-order-item-image-${orderId}-${item.product_id || item.id}`} />
                           <div>
-                            <h3 className="font-semibold" data-testid={`account-order-item-name-${order.id}-${item.id}`}>{item.name}</h3>
-                            <p className="text-sm text-zinc-500" data-testid={`account-order-item-qty-${order.id}-${item.id}`}>Qty: {item.quantity}</p>
+                            <h3 className="font-semibold" data-testid={`account-order-item-name-${orderId}-${item.product_id || item.id}`}>{item.name}</h3>
+                            <p className="text-sm text-zinc-500" data-testid={`account-order-item-qty-${orderId}-${item.product_id || item.id}`}>Qty: {item.quantity}</p>
                           </div>
-                          <p className="text-lg font-semibold" data-testid={`account-order-item-price-${order.id}-${item.id}`}>${item.price.toFixed(2)}</p>
+                          <p className="text-lg font-semibold" data-testid={`account-order-item-price-${orderId}-${item.product_id || item.id}`}>${(item.price || item.unit_price || 0).toFixed(2)}</p>
                         </div>
                       ))}
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2" data-testid={`account-order-actions-${order.id}`}>
-                      <Button variant="outline" data-testid={`account-order-invoice-button-${order.id}`} onClick={() => toast.success(`Invoice for ${order.id} downloaded`)}>
+                    <div className="mt-4 flex flex-wrap gap-2" data-testid={`account-order-actions-${orderId}`}>
+                      <Button variant="outline" data-testid={`account-order-invoice-button-${orderId}`} onClick={() => toast.success(`Invoice for ${orderId} downloaded`)}>
                         <Box className="mr-1 h-4 w-4" /> Invoice
                       </Button>
-                      <Button variant="outline" data-testid={`account-order-view-details-button-${order.id}`} onClick={() => toast.info(`Details opened for ${order.id}`)}>
+                      <Button variant="outline" data-testid={`account-order-view-details-button-${orderId}`} onClick={() => toast.info(`Details opened for ${orderId}`)}>
                         View Details
                       </Button>
-                      <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid={`account-order-track-button-${order.id}`} onClick={() => toast.success(`Tracking ${order.id}`)}>
+                      <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid={`account-order-track-button-${orderId}`} onClick={() => toast.success(`Tracking ${orderId}`)}>
                         Track Package
                       </Button>
                     </div>
                   </article>
-                ))}
+                )})}
               </TabsContent>
 
               <TabsContent value="profile" className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900" data-testid="account-profile-content">
                 <h3 className="text-2xl font-bold" data-testid="account-profile-heading">Profile Information</h3>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <Input defaultValue="Alex" data-testid="account-profile-first-name-input" />
-                  <Input defaultValue="Johnson" data-testid="account-profile-last-name-input" />
-                  <Input defaultValue="alex@example.com" data-testid="account-profile-email-input" />
-                  <Input defaultValue="+1 310 555 9988" data-testid="account-profile-phone-input" />
+                  <Input value={profileName} onChange={(event) => setProfileName(event.target.value)} data-testid="account-profile-first-name-input" />
+                  <Input value={user?.email || ""} readOnly data-testid="account-profile-email-input" />
+                  <Input value={profilePhone} onChange={(event) => setProfilePhone(event.target.value)} data-testid="account-profile-phone-input" />
+                  <Input value={user?.id || ""} readOnly data-testid="account-profile-user-id-input" />
                 </div>
-                <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="account-profile-save-button" onClick={() => toast.success("Profile updated")}>Save Profile</Button>
+                <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="account-profile-save-button" onClick={handleSaveProfile}>Save Profile</Button>
               </TabsContent>
 
               <TabsContent value="addresses" className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900" data-testid="account-addresses-content">
@@ -220,7 +302,7 @@ export default function AccountPage() {
                       <p className="font-semibold" data-testid="account-settings-shipment-title">Shipment Updates</p>
                       <p className="text-sm text-zinc-500" data-testid="account-settings-shipment-description">Receive order tracking alerts.</p>
                     </div>
-                    <Switch checked={shipmentEnabled} onCheckedChange={setShipmentEnabled} data-testid="account-settings-shipment-switch" />
+                    <Switch checked={shipmentEnabled} onCheckedChange={(value) => updateAccountSettings({ shipment_updates: value })} data-testid="account-settings-shipment-switch" />
                   </div>
 
                   <div className="flex items-center justify-between rounded-lg border border-zinc-200 p-4 dark:border-zinc-700" data-testid="account-settings-marketing-row">
@@ -228,10 +310,10 @@ export default function AccountPage() {
                       <p className="font-semibold" data-testid="account-settings-marketing-title">Deals & Marketing</p>
                       <p className="text-sm text-zinc-500" data-testid="account-settings-marketing-description">Receive weekly promos and flash sales.</p>
                     </div>
-                    <Switch checked={marketingEnabled} onCheckedChange={setMarketingEnabled} data-testid="account-settings-marketing-switch" />
+                    <Switch checked={marketingEnabled} onCheckedChange={(value) => updateAccountSettings({ marketing_updates: value })} data-testid="account-settings-marketing-switch" />
                   </div>
 
-                  <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid="account-settings-save-button" onClick={() => toast.success("Settings saved")}>Save Settings</Button>
+                  <Button className="bg-blue-600 text-white hover:bg-blue-700" data-testid="account-settings-save-button" onClick={handleSaveSettings}>Save Settings</Button>
                 </div>
               </TabsContent>
             </Tabs>
