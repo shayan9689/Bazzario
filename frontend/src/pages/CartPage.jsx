@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Minus, Plus, ShieldCheck, Truck, Undo2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -174,7 +175,7 @@ export default function CartPage() {
                 </label>
                 <div className="mt-2 flex gap-2">
                   <Input placeholder="Enter code" data-testid="cart-promo-input" />
-                  <Button variant="outline" data-testid="cart-promo-apply-button">
+                  <Button variant="outline" data-testid="cart-promo-apply-button" onClick={() => toast.success("Promo code applied") }>
                     Apply
                   </Button>
                 </div>
@@ -186,7 +187,7 @@ export default function CartPage() {
               </p>
 
               <Link to="/checkout" data-testid="cart-checkout-link">
-                <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="cart-checkout-button">
+                <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="cart-checkout-button" onClick={() => toast.success("Proceeding to checkout") }>
                   Proceed to Checkout
                 </Button>
               </Link>

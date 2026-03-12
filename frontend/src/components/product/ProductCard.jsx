@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 function formatCurrency(value) {
@@ -61,6 +62,7 @@ export default function ProductCard({ product, compact = false }) {
               className="rounded-full border border-zinc-200 p-2 text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
               data-testid={`product-card-wishlist-button-${product.id}`}
               aria-label={`wishlist ${product.name}`}
+              onClick={() => toast.success(`${product.name} saved to wishlist`)}
             >
               <Heart className="h-4 w-4" />
             </button>
@@ -69,6 +71,7 @@ export default function ProductCard({ product, compact = false }) {
               className="rounded-full bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700"
               data-testid={`product-card-add-to-cart-button-${product.id}`}
               aria-label={`add ${product.name} to cart`}
+              onClick={() => toast.success(`${product.name} added to cart`)}
             >
               <ShoppingCart className="h-4 w-4" />
             </button>

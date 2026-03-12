@@ -69,7 +69,7 @@ export default function HomePage() {
                       Shop Now <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link to="/product/luminary-x1" data-testid="home-hero-details-button-link">
+                  <Link to="/product/velocity-pro-runner" data-testid="home-hero-details-button-link">
                     <Button variant="outline" className="h-12 rounded-full border-white bg-transparent px-8 text-white hover:bg-white hover:text-zinc-900" data-testid="home-hero-details-button">
                       Explore Deals
                     </Button>
@@ -134,7 +134,7 @@ export default function HomePage() {
                     Shop Now
                   </Button>
                 </Link>
-                <Link to="/product/luminary-x1" data-testid="home-promo-view-product-link">
+                <Link to="/product/velocity-pro-runner" data-testid="home-promo-view-product-link">
                   <Button variant="outline" className="h-11 rounded-full border-white bg-transparent px-7 text-white hover:bg-white hover:text-zinc-900" data-testid="home-promo-view-product-button">
                     View Product
                   </Button>
@@ -143,8 +143,8 @@ export default function HomePage() {
             </div>
             <div className="overflow-hidden rounded-2xl bg-white/20 p-2" data-testid="home-promo-image-wrap">
               <img
-                src="https://images.unsplash.com/photo-1704440278730-b420f5892700?auto=format&fit=crop&w=1000&q=80"
-                alt="Headphone promo"
+                src="https://images.unsplash.com/photo-1620790458588-c6c4a0d68a84?auto=format&fit=crop&w=1000&q=80"
+                alt="Sneaker promo"
                 className="h-56 w-full rounded-xl object-cover"
                 data-testid="home-promo-image"
               />

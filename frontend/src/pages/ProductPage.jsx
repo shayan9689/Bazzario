@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CheckCircle2, Heart, Share2, ShieldCheck, Truck } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -12,8 +13,8 @@ import { productGallery, products, specs } from "@/data/storeData";
 
 const colorOptions = [
   { id: "black", hex: "#111827", label: "Matte Black" },
-  { id: "silver", hex: "#e5e7eb", label: "Arctic Silver" },
-  { id: "blue", hex: "#1d4ed8", label: "Deep Blue" },
+  { id: "silver", hex: "#f5f5f4", label: "Cloud White" },
+  { id: "blue", hex: "#1d4ed8", label: "Skyline Blue" },
 ];
 
 export default function ProductPage() {
@@ -21,7 +22,7 @@ export default function ProductPage() {
   const product = useMemo(() => products.find((item) => item.id === productId) || products[0], [productId]);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
-  const [selectedPackage, setSelectedPackage] = useState("xl-case");
+  const [selectedPackage, setSelectedPackage] = useState("us-9");
 
   return (
     <div className="app-shell" data-testid="product-page-root">
@@ -31,9 +32,9 @@ export default function ProductPage() {
         <section className="container-shell py-8 md:py-10" data-testid="product-main-section">
           <p className="text-sm text-zinc-500" data-testid="product-breadcrumb-text">
             <Link to="/shop" className="hover:text-zinc-800" data-testid="product-breadcrumb-shop-link">
-              Electronics
+              Sneakers
             </Link>{" "}
-            / Audio / {product.name}
+            / Lifestyle / {product.name}
           </p>
 
           <div className="mt-4 grid gap-7 lg:grid-cols-[120px_1fr_1fr]">
@@ -80,8 +81,7 @@ export default function ProductPage() {
               </div>
 
               <p className="mt-4 text-zinc-600" data-testid="product-description">
-                Experience premium audio with industry-leading active noise cancellation, 40-hour battery life, and immersive
-                spatial sound that adapts to your surroundings.
+                Built for all-day movement with responsive cushioning, breathable upper mesh, and durable grip for city and training use.
               </p>
 
               <div className="mt-6" data-testid="product-color-selector">
@@ -105,8 +105,8 @@ export default function ProductPage() {
                 <p className="text-sm font-semibold text-zinc-700" data-testid="product-package-title">Package Type</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {[
-                    { id: "xl-case", label: "XL Case" },
-                    { id: "xl-packing", label: "XL Packing" },
+                    { id: "us-9", label: "US 9" },
+                    { id: "us-10", label: "US 10" },
                   ].map((option) => (
                     <button
                       key={option.id}
@@ -128,10 +128,10 @@ export default function ProductPage() {
               </p>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <Button className="h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="product-add-to-cart-button">
+                <Button className="h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="product-add-to-cart-button" onClick={() => toast.success(`${product.name} added to cart`)}>
                   Add to Cart
                 </Button>
-                <Button variant="outline" className="h-12 rounded-full" data-testid="product-buy-now-button">
+                <Button variant="outline" className="h-12 rounded-full" data-testid="product-buy-now-button" onClick={() => toast.success("Proceeding to checkout") }>
                   Buy Now
                 </Button>
               </div>
@@ -144,10 +144,10 @@ export default function ProductPage() {
                   <ShieldCheck className="h-4 w-4" /> Secure Payments
                 </p>
                 <div className="flex items-center gap-2">
-                  <button type="button" className="rounded-full border border-zinc-200 p-2" data-testid="product-wishlist-button" aria-label="Save">
+                  <button type="button" className="rounded-full border border-zinc-200 p-2" data-testid="product-wishlist-button" aria-label="Save" onClick={() => toast.success("Added to wishlist") }>
                     <Heart className="h-4 w-4" />
                   </button>
-                  <button type="button" className="rounded-full border border-zinc-200 p-2" data-testid="product-share-button" aria-label="Share">
+                  <button type="button" className="rounded-full border border-zinc-200 p-2" data-testid="product-share-button" aria-label="Share" onClick={() => toast.success("Share link copied") }>
                     <Share2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -166,8 +166,8 @@ export default function ProductPage() {
 
             <TabsContent value="overview" className="rounded-2xl border border-zinc-200 bg-white p-5" data-testid="product-overview-content">
               <p className="text-zinc-600" data-testid="product-overview-text">
-                The Luminary X1 is engineered for immersive listening with adaptive ANC and premium memory foam comfort.
-                Crafted for long work sessions, travel, and studio-quality calls.
+                This Bazzario runner is engineered for speed, daily wear, and premium comfort. Lightweight build and adaptive
+                support keep your stride stable from commute to cardio.
               </p>
             </TabsContent>
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CircleCheckBig, LockKeyhole, PackageCheck, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -160,10 +161,10 @@ export default function CheckoutPage() {
 
               <div className="mt-4 flex gap-2" data-testid="checkout-promo-row">
                 <Input placeholder="Promo code" data-testid="checkout-promo-input" />
-                <Button variant="outline" data-testid="checkout-promo-apply-button">Apply</Button>
+                <Button variant="outline" data-testid="checkout-promo-apply-button" onClick={() => toast.success("Promo applied") }>Apply</Button>
               </div>
 
-              <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="checkout-place-order-button">
+              <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="checkout-place-order-button" onClick={() => toast.success("Order placed successfully") }>
                 Place Order Now
               </Button>
               <p className="mt-2 text-center text-xs text-zinc-500" data-testid="checkout-legal-note">

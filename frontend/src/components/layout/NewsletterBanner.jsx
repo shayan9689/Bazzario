@@ -20,7 +20,7 @@ export default function NewsletterBanner() {
               Stay ahead of the curve
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl" data-testid="newsletter-heading">
-              Join the ShopCentral Insider Family
+              Join the Bazzario Insider Family
             </h2>
             <p className="mt-2 text-sm text-zinc-600 md:text-base" data-testid="newsletter-description">
               Get first access to premium launches, curated picks, and exclusive weekend deals only for members.

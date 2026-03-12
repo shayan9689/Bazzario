@@ -1,6 +1,7 @@
 export const navItems = [
   { label: "Shop", path: "/shop" },
-  { label: "Categories", path: "/shop" },
+  { label: "Search", path: "/search-results" },
+  { label: "Account", path: "/account" },
   { label: "Deals", path: "/shop" },
 ];
 
@@ -13,170 +14,165 @@ export const trustPillars = [
 
 export const categoryCards = [
   {
-    id: "electronics",
-    title: "Electronics",
-    description: "Smart upgrades for work and play",
-    image:
-      "https://images.unsplash.com/photo-1550029402-8280f657d8d1?auto=format&fit=crop&w=900&q=80",
+    id: "running",
+    title: "Running",
+    description: "Engineered comfort for every pace",
+    image: "https://images.unsplash.com/photo-1608380272894-b3617f04b463?auto=format&fit=crop&w=900&q=80",
   },
   {
-    id: "fashion",
-    title: "Fashion",
-    description: "Premium essentials for daily wear",
-    image:
-      "https://images.unsplash.com/photo-1575633660454-cd44c9538d91?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "home-living",
-    title: "Home & Living",
-    description: "Minimal pieces that elevate spaces",
-    image:
-      "https://images.unsplash.com/photo-1744369382894-98e0264d2481?auto=format&fit=crop&w=900&q=80",
+    id: "lifestyle",
+    title: "Lifestyle",
+    description: "Street-ready silhouettes with premium finish",
+    image: "https://images.unsplash.com/photo-1620790458588-c6c4a0d68a84?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "wearables",
     title: "Wearables",
-    description: "Design meets performance",
-    image:
-      "https://images.unsplash.com/photo-1602248145578-9e5bc50c77b3?auto=format&fit=crop&w=900&q=80",
+    description: "Smart accessories for modern routines",
+    image: "https://images.unsplash.com/photo-1649142738067-1c88b4406cc7?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    id: "accessories",
+    title: "Accessories",
+    description: "Minimal pieces to complete your fit",
+    image: "https://images.unsplash.com/photo-1768025719875-48ed072f3084?auto=format&fit=crop&w=900&q=80",
   },
 ];
 
 export const heroBanner = {
-  eyebrow: "Summer Collection 2026",
-  title: "Elevate Your Lifestyle with Premium Gear",
+  eyebrow: "Bazzario Signature Collection",
+  title: "Elevate Your Street Style with Bazzario",
   subtitle:
-    "Discover cutting-edge technology and handcrafted accessories designed for modern professionals.",
-  image:
-    "https://images.unsplash.com/photo-1765009433753-c7462637d21f?auto=format&fit=crop&w=1800&q=80",
+    "Premium sneakers and fashion-forward essentials curated for trend leaders and performance seekers.",
+  image: "https://images.unsplash.com/photo-1765009433753-c7462637d21f?auto=format&fit=crop&w=1800&q=80",
 };
 
 export const products = [
   {
-    id: "luminary-x1",
-    name: "Luminary X1 Wireless Headphones",
-    brand: "Lumina",
-    price: 229.0,
-    oldPrice: 299.0,
+    id: "velocity-pro-runner",
+    name: "Velocity Pro Runner - Midnight Black",
+    brand: "Nike",
+    price: 129.99,
+    oldPrice: 169.99,
     rating: 4.8,
-    reviews: 1204,
-    tag: "New",
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1709077346031-5dd0ac6e0826?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "zenith-watch",
-    name: "Zenith Minimalist Smartwatch",
-    brand: "Zenith",
-    price: 192.5,
-    oldPrice: 249.99,
-    rating: 4.7,
-    reviews: 822,
+    reviews: 324,
     tag: "Best Seller",
-    category: "Wearables",
-    image:
-      "https://images.unsplash.com/photo-1718309602791-8f3cc83840b7?auto=format&fit=crop&w=900&q=80",
+    category: "Running",
+    colorName: "black",
+    image: "https://images.unsplash.com/photo-1559743345-60e0907c4853?auto=format&fit=crop&w=900&q=80",
   },
   {
-    id: "aero-keyboard",
-    name: "Aero Mechanical Keyboard",
-    brand: "Aero",
-    price: 129.0,
-    oldPrice: 159.0,
-    rating: 4.6,
-    reviews: 381,
-    tag: "Trending",
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1759588071790-9afb3fd61d23?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "vista-runner",
-    name: "Vista Performance Runners",
-    brand: "Vista",
-    price: 89.0,
-    oldPrice: 120.0,
-    rating: 4.5,
-    reviews: 297,
-    tag: "Hot",
-    category: "Fashion",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "nordic-speaker",
-    name: "Nordic Noise Canceling Mic",
-    brand: "Nordic",
-    price: 159.0,
-    oldPrice: 199.0,
-    rating: 4.4,
-    reviews: 416,
-    tag: "Limited",
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1622986416229-fc8233af2ae6?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "auris-smart-home",
-    name: "Auris Smart Home Set",
-    brand: "Auris",
-    price: 249.0,
-    oldPrice: 289.0,
+    id: "technical-running",
+    name: "Technical Running - Cloud White",
+    brand: "Adidas",
+    price: 159.5,
+    oldPrice: 189.0,
     rating: 4.7,
-    reviews: 679,
-    tag: "Popular",
-    category: "Home & Living",
-    image:
-      "https://images.unsplash.com/photo-1745541472989-acea77b68a43?auto=format&fit=crop&w=900&q=80",
+    reviews: 291,
+    tag: "View Arrival",
+    category: "Running",
+    colorName: "white",
+    image: "https://images.unsplash.com/photo-1608384177866-0bca0d225435?auto=format&fit=crop&w=900&q=80",
   },
   {
-    id: "zen-home-perfume",
-    name: "Zen Home Fragrance Kit",
-    brand: "Atelier",
-    price: 64.0,
-    oldPrice: 92.0,
+    id: "urban-canvas",
+    name: "Urban Canvas - Skyline Blue",
+    brand: "Puma",
+    price: 65.0,
+    oldPrice: 89.0,
+    rating: 4.4,
+    reviews: 263,
+    tag: "Trending",
+    category: "Lifestyle",
+    colorName: "blue",
+    image: "https://images.unsplash.com/photo-1588416681455-3f2ba669371d?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    id: "all-weather-trail",
+    name: "All-Weather Trail - Earth Brown",
+    brand: "New Balance",
+    price: 145.0,
+    oldPrice: 199.0,
     rating: 4.5,
-    reviews: 188,
-    tag: "Editor Pick",
-    category: "Home & Living",
-    image:
-      "https://images.unsplash.com/photo-1617943539287-d6fe110ac7ad?auto=format&fit=crop&w=900&q=80",
+    reviews: 411,
+    tag: "Outdoor",
+    category: "Walking",
+    colorName: "green",
+    image: "https://images.unsplash.com/photo-1615743771721-e2ee843a41c0?auto=format&fit=crop&w=900&q=80",
   },
   {
-    id: "urban-bag",
-    name: "Urban Leather Tote",
-    brand: "Velvet",
-    price: 85.0,
-    oldPrice: 110.0,
+    id: "classic-court",
+    name: "Classic Court - Match Edition",
+    brand: "Reebok",
+    price: 89.99,
+    oldPrice: 119.0,
+    rating: 4.2,
+    reviews: 178,
+    tag: "On Court",
+    category: "Basketball",
+    colorName: "red",
+    image: "https://images.unsplash.com/photo-1625860191460-10a66c7384fb?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    id: "minimalist-white",
+    name: "Minimalist White - Everyday Fit",
+    brand: "ASICS",
+    price: 110.0,
+    oldPrice: 149.0,
+    rating: 4.4,
+    reviews: 255,
+    tag: "Clean Drop",
+    category: "Training",
+    colorName: "white",
+    image: "https://images.unsplash.com/photo-1608380272894-b3617f04b463?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    id: "retro-suede",
+    name: "Retro Suede - Heritage Brown",
+    brand: "Nike",
+    price: 95.0,
+    oldPrice: 129.0,
     rating: 4.3,
-    reviews: 246,
-    tag: "Classic",
-    category: "Fashion",
-    image:
-      "https://images.unsplash.com/photo-1575633660454-cd44c9538d91?auto=format&fit=crop&w=900&q=80",
+    reviews: 302,
+    tag: "Limited Edition",
+    category: "Lifestyle",
+    colorName: "red",
+    image: "https://images.unsplash.com/photo-1620790458588-c6c4a0d68a84?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    id: "sport-performance",
+    name: "Sport Performance - Sprint Orange",
+    brand: "Puma",
+    price: 180.0,
+    oldPrice: 225.0,
+    rating: 4.8,
+    reviews: 350,
+    tag: "Pro Pick",
+    category: "Running",
+    colorName: "yellow",
+    image: "https://images.unsplash.com/photo-1746206673199-5b75dcec1018?auto=format&fit=crop&w=900&q=80",
   },
 ];
 
 export const productGallery = [
-  "https://images.unsplash.com/photo-1709077346031-5dd0ac6e0826?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1755182529034-189a6051faae?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1602248145578-9e5bc50c77b3?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1759588071814-1ba7c5761af4?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1559743345-60e0907c4853?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1608380272894-b3617f04b463?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1625860191460-10a66c7384fb?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1615743771721-e2ee843a41c0?auto=format&fit=crop&w=900&q=80",
 ];
 
 export const specs = [
-  { label: "Frequency Response", value: "20Hz - 20kHz" },
-  { label: "Battery Life", value: "Up to 40 hours, USB-C fast charge" },
-  { label: "Weight", value: "280g" },
-  { label: "Charging Port", value: "USB-C" },
-  { label: "Bluetooth Version", value: "5.3" },
+  { label: "Upper Material", value: "Engineered breathable mesh" },
+  { label: "Midsole", value: "Responsive EVA cushioning" },
+  { label: "Outsole", value: "High-grip rubber traction" },
+  { label: "Weight", value: "265g" },
+  { label: "Use Case", value: "Road running and daily training" },
 ];
 
 export const initialCartItems = [
-  { id: "luminary-x1", quantity: 1, color: "Matte Black", size: "One-size" },
-  { id: "zenith-watch", quantity: 1, color: "Titanium", size: "44mm" },
-  { id: "aero-keyboard", quantity: 1, color: "Ocean Blue", size: "Compact" },
+  { id: "velocity-pro-runner", quantity: 1, color: "Midnight Black", size: "US 9" },
+  { id: "technical-running", quantity: 1, color: "Cloud White", size: "US 10" },
+  { id: "urban-canvas", quantity: 1, color: "Skyline Blue", size: "US 8" },
 ];
 
 export const footerColumns = {
@@ -184,3 +180,75 @@ export const footerColumns = {
   support: ["Help Center", "Shipping Info", "Returns", "Contact Us"],
   company: ["About Us", "Careers", "Sustainability", "Privacy Policy"],
 };
+
+export const accountStats = [
+  { id: "total-orders", label: "Total Orders", value: "24" },
+  { id: "active-shipments", label: "Active Shipments", value: "2" },
+  { id: "delivered-items", label: "Delivered Items", value: "48" },
+  { id: "account-age", label: "Account Age", value: "2 Years" },
+];
+
+export const accountOrderHistory = [
+  {
+    id: "SC-892341",
+    date: "May 12, 2024",
+    total: 245.98,
+    shipTo: "Alex Johnson",
+    status: "Shipped",
+    items: [
+      {
+        id: "velocity-pro-runner",
+        name: "Velocity Pro Runner - Midnight Black",
+        quantity: 1,
+        price: 129.99,
+        image: "https://images.unsplash.com/photo-1559743345-60e0907c4853?auto=format&fit=crop&w=300&q=80",
+      },
+      {
+        id: "classic-fleece-hoodie",
+        name: "Classic Fleece Hoodie - Heather Gray",
+        quantity: 1,
+        price: 59.99,
+        image: "https://images.unsplash.com/photo-1614714053570-6c6b6aa54a6d?auto=format&fit=crop&w=300&q=80",
+      },
+    ],
+  },
+  {
+    id: "SC-771202",
+    date: "Apr 28, 2024",
+    total: 89.5,
+    shipTo: "Alex Johnson",
+    status: "Delivered",
+    items: [
+      {
+        id: "stainless-water-bottle",
+        name: "Insulated Stainless Steel Water Bottle - 32oz",
+        quantity: 2,
+        price: 34.5,
+        image: "https://images.unsplash.com/photo-1628911771814-5d61388efbf7?auto=format&fit=crop&w=300&q=80",
+      },
+    ],
+  },
+  {
+    id: "SC-663201",
+    date: "Mar 15, 2024",
+    total: 1120.0,
+    shipTo: "Alex Johnson",
+    status: "Delivered",
+    items: [
+      {
+        id: "omnipad-pro",
+        name: "OmniPad Pro 11-inch with M2 Chip",
+        quantity: 1,
+        price: 999,
+        image: "https://images.unsplash.com/photo-1628911772787-0192e81cdaa7?auto=format&fit=crop&w=300&q=80",
+      },
+      {
+        id: "leather-folio-case",
+        name: "Leather Smart Folio Case - Saddle Brown",
+        quantity: 1,
+        price: 121,
+        image: "https://images.unsplash.com/photo-1695048312374-4fa7ad4cae07?auto=format&fit=crop&w=300&q=80",
+      },
+    ],
+  },
+];

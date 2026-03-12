@@ -10,9 +10,6 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import NewsletterBanner from "@/components/layout/NewsletterBanner";
 import { products } from "@/data/storeData";
 
-const categoryFilters = ["Electronics", "Fashion", "Home & Living", "Wearables"];
-const brandFilters = ["Lumina", "Zenith", "Aero", "Vista", "Nordic", "Auris", "Atelier", "Velvet"];
-
 function sortProducts(list, sort) {
   const cloned = [...list];
   if (sort === "price-low") return cloned.sort((a, b) => a.price - b.price);
@@ -22,7 +19,9 @@ function sortProducts(list, sort) {
 }
 
 export default function ShopPage() {
-  const [selectedCategories, setSelectedCategories] = useState(["Electronics"]);
+  const categoryFilters = useMemo(() => [...new Set(products.map((product) => product.category))], []);
+  const brandFilters = useMemo(() => [...new Set(products.map((product) => product.brand))], []);
+  const [selectedCategories, setSelectedCategories] = useState(["Running"]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [maxPrice, setMaxPrice] = useState(500);
   const [sortBy, setSortBy] = useState("featured");
@@ -70,19 +69,19 @@ export default function ShopPage() {
           <div className="grid gap-6 rounded-3xl border border-zinc-200 bg-white p-6 md:grid-cols-[1.1fr_0.9fr] md:p-8">
             <div>
               <p className="inline-flex rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600" data-testid="shop-banner-eyebrow">
-                Summer Collection 2026
+                Trending Sneakers 2026
               </p>
               <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" data-testid="shop-banner-heading">
-                Elevate Your Lifestyle with Premium Gear
+                Crafted Sneakers for Daily Performance
               </h1>
               <p className="mt-3 max-w-xl text-zinc-600" data-testid="shop-banner-description">
-                Discover cutting-edge technology and handcrafted accessories designed for modern professionals.
+                Explore sports-ready and street-ready collections curated for modern style and comfort.
               </p>
             </div>
             <div className="overflow-hidden rounded-2xl" data-testid="shop-banner-image-wrap">
               <img
-                src="https://images.unsplash.com/photo-1744369382894-98e0264d2481?auto=format&fit=crop&w=1300&q=80"
-                alt="Premium products"
+                src="https://images.unsplash.com/photo-1608380272894-b3617f04b463?auto=format&fit=crop&w=1300&q=80"
+                alt="Premium sneakers"
                 className="h-64 w-full object-cover"
                 data-testid="shop-banner-image"
               />
@@ -184,7 +183,7 @@ export default function ShopPage() {
                     Home / Shop / All Products
                   </p>
                   <h2 className="mt-1 text-3xl font-bold" data-testid="shop-products-heading">
-                    All Electronics
+                    All Sneaker Collections
                   </h2>
                   <p className="text-sm text-zinc-500" data-testid="shop-products-count-text">
                     Showing {filteredProducts.length} products
