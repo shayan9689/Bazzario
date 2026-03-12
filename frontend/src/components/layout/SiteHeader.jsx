@@ -28,10 +28,10 @@ export default function SiteHeader({ cartCount = 0 }) {
       className="sticky top-0 z-50 border-b border-zinc-200/80 glass-nav"
       data-testid="site-main-header"
     >
-      <div className="container-shell flex h-20 items-center gap-4">
+      <div className="container-shell flex h-20 items-center gap-2 md:gap-4">
         <Link
           to="/"
-          className="flex min-w-fit items-center gap-2"
+          className="flex min-w-0 flex-1 items-center gap-2 md:flex-none"
           data-testid="header-logo-link"
           aria-label="Go to home"
         >
@@ -41,7 +41,10 @@ export default function SiteHeader({ cartCount = 0 }) {
           >
             <ShoppingBag className="h-4 w-4" />
           </span>
-          <span className="font-heading text-2xl font-extrabold tracking-tight text-blue-600" data-testid="header-logo-text">
+          <span
+            className="font-heading max-w-[148px] truncate text-xl font-extrabold tracking-tight text-blue-600 sm:max-w-none sm:text-2xl"
+            data-testid="header-logo-text"
+          >
             ShopCentral
           </span>
         </Link>
@@ -67,7 +70,7 @@ export default function SiteHeader({ cartCount = 0 }) {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-3" data-testid="header-action-group">
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3" data-testid="header-action-group">
           <Link to="/cart" className="relative rounded-full p-2 hover:bg-zinc-100" data-testid="header-cart-link" aria-label="Open cart">
             <ShoppingBag className="h-5 w-5" />
             <span

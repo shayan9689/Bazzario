@@ -53,6 +53,14 @@ export default function ShopPage() {
     setPage(1);
   };
 
+  const resetAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setMaxPrice(500);
+    setSortBy("featured");
+    setPage(1);
+  };
+
   return (
     <div className="app-shell" data-testid="shop-page-root">
       <SiteHeader cartCount={3} />
@@ -215,33 +223,59 @@ export default function ShopPage() {
                 </div>
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className={viewType === "grid" ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-4" : "grid gap-5"}
-                data-testid="shop-products-grid"
-              >
-                {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} compact={viewType === "list"} />
-                ))}
-              </motion.div>
-
-              <div className="mt-7 flex flex-wrap items-center justify-center gap-2" data-testid="shop-pagination-controls">
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNumber) => (
-                  <button
-                    key={pageNumber}
+              {paginatedProducts.length > 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  className={viewType === "grid" ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-4" : "grid gap-5"}
+                  data-testid="shop-products-grid"
+                >
+                  {paginatedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} compact={viewType === "list"} />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.article
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center"
+                  data-testid="shop-empty-state"
+                >
+                  <h3 className="text-2xl font-bold" data-testid="shop-empty-state-title">
+                    No products found
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-md text-zinc-600" data-testid="shop-empty-state-description">
+                    Try adjusting category, brand, or price filters to discover more products.
+                  </p>
+                  <Button
                     type="button"
-                    onClick={() => setPage(pageNumber)}
-                    className={`h-9 min-w-9 rounded-md border px-3 text-sm ${
-                      page === pageNumber ? "border-blue-600 bg-blue-600 text-white" : "border-zinc-200 text-zinc-700"
-                    }`}
-                    data-testid={`shop-pagination-button-${pageNumber}`}
+                    onClick={resetAllFilters}
+                    className="mt-5 h-11 rounded-full bg-blue-600 px-8 text-white hover:bg-blue-700"
+                    data-testid="shop-empty-state-reset-button"
                   >
-                    {pageNumber}
-                  </button>
-                ))}
-              </div>
+                    Reset Filters
+                  </Button>
+                </motion.article>
+              )}
+
+              {paginatedProducts.length > 0 && (
+                <div className="mt-7 flex flex-wrap items-center justify-center gap-2" data-testid="shop-pagination-controls">
+                  {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNumber) => (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => setPage(pageNumber)}
+                      className={`h-9 min-w-9 rounded-md border px-3 text-sm ${
+                        page === pageNumber ? "border-blue-600 bg-blue-600 text-white" : "border-zinc-200 text-zinc-700"
+                      }`}
+                      data-testid={`shop-pagination-button-${pageNumber}`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
