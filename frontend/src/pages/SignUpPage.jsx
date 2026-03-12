@@ -1,4 +1,4 @@
-import { ArrowRight, Lock, Mail, User2 } from "lucide-react";
+import { ArrowRight, Eye, Lock, Mail, User2 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,11 +12,13 @@ import { useStore } from "@/context/StoreContext";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const { signUp } = useStore();
+  const { signUp, socialAuth } = useStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -29,6 +31,19 @@ export default function SignUpPage() {
       toast.error(error?.response?.data?.detail || "Unable to create account");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSocialSignup = async (provider) => {
+    setSocialLoading(provider);
+    try {
+      await socialAuth(provider);
+      toast.success(`${provider} account ready`);
+      navigate("/account");
+    } catch (error) {
+      toast.error(`Unable to continue with ${provider}`);
+    } finally {
+      setSocialLoading("");
     }
   };
 
@@ -52,10 +67,26 @@ export default function SignUpPage() {
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3" data-testid="signup-social-buttons">
-            <Button variant="outline" className="h-11 rounded-xl" data-testid="signup-google-button" aria-label="Continue with Google">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-xl"
+              data-testid="signup-google-button"
+              aria-label="Continue with Google"
+              onClick={() => handleSocialSignup("Google")}
+              disabled={loading || Boolean(socialLoading)}
+            >
               <GoogleIcon />
             </Button>
-            <Button variant="outline" className="h-11 rounded-xl" data-testid="signup-apple-button" aria-label="Continue with Apple">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-xl"
+              data-testid="signup-apple-button"
+              aria-label="Continue with Apple"
+              onClick={() => handleSocialSignup("Apple")}
+              disabled={loading || Boolean(socialLoading)}
+            >
               <AppleIcon />
             </Button>
           </div>
@@ -94,7 +125,15 @@ export default function SignUpPage() {
               </label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Create strong password" className="h-12 rounded-xl pl-9" data-testid="signup-password-input" />
+                <Input required type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Create strong password" className="h-12 rounded-xl pl-9 pr-10" data-testid="signup-password-input" />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                  data-testid="signup-password-visibility-button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
@@ -103,7 +142,7 @@ export default function SignUpPage() {
               <span data-testid="signup-terms-label">I agree to Terms of Service and Privacy Policy</span>
             </label>
 
-            <Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signup-submit-button">
+            <Button type="submit" disabled={loading || Boolean(socialLoading)} className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signup-submit-button">
               {loading ? "Creating..." : "Create Account"} {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>

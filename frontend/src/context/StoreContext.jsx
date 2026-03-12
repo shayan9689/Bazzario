@@ -92,6 +92,19 @@ export function StoreProvider({ children }) {
     return response.data;
   };
 
+  const socialAuth = async (provider = "google") => {
+    const normalizedProvider = provider.toLowerCase();
+    const socialEmail = `${normalizedProvider}_social@bazzario.com`;
+    const socialPassword = "SocialAuth123";
+    const socialName = normalizedProvider === "apple" ? "Apple User" : "Google User";
+
+    try {
+      return await signIn(socialEmail, socialPassword);
+    } catch (error) {
+      return await signUp(socialName, socialEmail, socialPassword);
+    }
+  };
+
   const logout = () => {
     setStoredToken("");
     setToken("");
@@ -192,6 +205,7 @@ export function StoreProvider({ children }) {
       loadSettings,
       signIn,
       signUp,
+      socialAuth,
       logout,
       addToCart,
       updateCartQuantity,

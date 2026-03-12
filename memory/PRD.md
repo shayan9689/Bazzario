@@ -82,6 +82,12 @@
   - Verified Stripe redirect from UI to checkout.stripe.com with non-empty cart.
   - Verified APIs with curl and automated tests; payment session/status endpoints return valid responses.
 
+### 2026-03-13 (follow-up)
+- Fixed social auth buttons so **Google** and **Apple** now perform real sign-in/sign-up flow and redirect to account.
+- Added password visibility toggle behavior on both sign-in and sign-up forms.
+- Added forgot-password click handling (demo reset action with UX feedback) so it is no longer a dead button.
+- Revalidated via browser automation that Google/Apple buttons are functional and reach `/account` successfully.
+
 ## Prioritized Backlog
 ### P0 (Next Critical)
 - Add production-grade Stripe webhook secret verification and post-payment confirmation page.

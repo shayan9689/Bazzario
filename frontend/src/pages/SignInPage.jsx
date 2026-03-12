@@ -12,10 +12,12 @@ import { useStore } from "@/context/StoreContext";
 
 export default function SignInPage() {
   const navigate = useNavigate();
-  const { signIn } = useStore();
+  const { signIn, socialAuth } = useStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,6 +30,19 @@ export default function SignInPage() {
       toast.error(error?.response?.data?.detail || "Unable to sign in");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSocialSignIn = async (provider) => {
+    setSocialLoading(provider);
+    try {
+      await socialAuth(provider);
+      toast.success(`${provider} sign in successful`);
+      navigate("/account");
+    } catch (error) {
+      toast.error(`Unable to continue with ${provider}`);
+    } finally {
+      setSocialLoading("");
     }
   };
 
@@ -51,10 +66,26 @@ export default function SignInPage() {
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3" data-testid="signin-social-buttons">
-            <Button variant="outline" className="h-11 rounded-xl" data-testid="signin-google-button" aria-label="Continue with Google">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-xl"
+              data-testid="signin-google-button"
+              aria-label="Continue with Google"
+              onClick={() => handleSocialSignIn("Google")}
+              disabled={loading || Boolean(socialLoading)}
+            >
               <GoogleIcon />
             </Button>
-            <Button variant="outline" className="h-11 rounded-xl" data-testid="signin-apple-button" aria-label="Continue with Apple">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-xl"
+              data-testid="signin-apple-button"
+              aria-label="Continue with Apple"
+              onClick={() => handleSocialSignIn("Apple")}
+              disabled={loading || Boolean(socialLoading)}
+            >
               <AppleIcon />
             </Button>
           </div>
@@ -82,14 +113,24 @@ export default function SignInPage() {
                 <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300" data-testid="signin-password-label">
                   Password
                 </label>
-                <button type="button" className="text-sm text-blue-600" data-testid="signin-forgot-password-button">
+                <button
+                  type="button"
+                  className="text-sm text-blue-600"
+                  data-testid="signin-forgot-password-button"
+                  onClick={() => toast.info("Password reset link sent (demo)")}
+                >
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" className="h-12 rounded-xl pl-9 pr-10" data-testid="signin-password-input" />
-                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" data-testid="signin-password-visibility-button">
+                <Input required type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" className="h-12 rounded-xl pl-9 pr-10" data-testid="signin-password-input" />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                  data-testid="signin-password-visibility-button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
                   <Eye className="h-4 w-4" />
                 </button>
               </div>
@@ -100,7 +141,7 @@ export default function SignInPage() {
               <span data-testid="signin-remember-label">Remember me for 30 days</span>
             </label>
 
-            <Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signin-submit-button">
+            <Button type="submit" disabled={loading || Boolean(socialLoading)} className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white hover:bg-blue-700" data-testid="signin-submit-button">
               {loading ? "Signing In..." : "Sign In"} {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
