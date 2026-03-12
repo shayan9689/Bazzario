@@ -17,16 +17,11 @@ const shippingOptions = [
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { cart, isAuthenticated, createOrder, createStripeCheckoutSession, checkStripeCheckoutStatus, loadCart } = useStore();
+  const { cart, isAuthenticated, createOrder, fetchOrderPreview, createStripeCheckoutSession, checkStripeCheckoutStatus, loadCart } = useStore();
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [paymentResult, setPaymentResult] = useState("");
-
-  const subtotal = cart?.subtotal || 0;
-  const shippingFee = shippingMethod === "express" ? 15 : 0;
-  const tax = (subtotal + shippingFee) * 0.08;
-  const discount = 20;
-  const total = subtotal + shippingFee + tax - discount;
+  const [orderPreview, setOrderPreview] = useState({ item_count: 0, subtotal: 0, tax: 0, shipping_fee: 0, discount: 0, total: 0 });
 
   const [formState, setFormState] = useState({
     firstName: "Alex",
@@ -46,6 +41,31 @@ export default function CheckoutPage() {
     if (!isAuthenticated) return;
     loadCart();
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setOrderPreview({ item_count: 0, subtotal: 0, tax: 0, shipping_fee: 0, discount: 0, total: 0 });
+      return;
+    }
+
+    const loadPreview = async () => {
+      try {
+        const preview = await fetchOrderPreview(shippingMethod);
+        setOrderPreview(preview);
+      } catch (error) {
+        setOrderPreview({
+          item_count: cart?.item_count || 0,
+          subtotal: cart?.subtotal || 0,
+          tax: cart?.tax || 0,
+          shipping_fee: shippingMethod === "express" ? 15 : 0,
+          discount: 0,
+          total: (cart?.total || 0) + (shippingMethod === "express" ? 15 : 0),
+        });
+      }
+    };
+
+    loadPreview();
+  }, [isAuthenticated, shippingMethod, cart?.item_count, cart?.total]);
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
@@ -80,7 +100,7 @@ export default function CheckoutPage() {
       navigate("/signin");
       return;
     }
-    if ((cart?.item_count || 0) === 0) {
+    if ((orderPreview?.item_count || 0) === 0) {
       toast.error("Your cart is empty");
       return;
     }
@@ -274,16 +294,22 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-4 space-y-2 border-y border-zinc-200 py-4 text-sm" data-testid="checkout-summary-breakdown">
-                <p className="flex justify-between" data-testid="checkout-summary-subtotal"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></p>
-                <p className="flex justify-between" data-testid="checkout-summary-shipping"><span>Shipping</span><span>{shippingFee ? `$${shippingFee.toFixed(2)}` : "Free"}</span></p>
-                <p className="flex justify-between" data-testid="checkout-summary-tax"><span>Estimated Tax</span><span>${tax.toFixed(2)}</span></p>
-                <p className="flex justify-between text-emerald-600" data-testid="checkout-summary-discount"><span>Promo Discount</span><span>-${discount.toFixed(2)}</span></p>
+                <p className="flex justify-between" data-testid="checkout-summary-subtotal"><span>Subtotal</span><span>${(orderPreview?.subtotal || 0).toFixed(2)}</span></p>
+                <p className="flex justify-between" data-testid="checkout-summary-shipping"><span>Shipping</span><span>{(orderPreview?.shipping_fee || 0) ? `$${(orderPreview?.shipping_fee || 0).toFixed(2)}` : "Free"}</span></p>
+                <p className="flex justify-between" data-testid="checkout-summary-tax"><span>Estimated Tax</span><span>${(orderPreview?.tax || 0).toFixed(2)}</span></p>
+                <p className="flex justify-between text-emerald-600" data-testid="checkout-summary-discount"><span>Promo Discount</span><span>-${(orderPreview?.discount || 0).toFixed(2)}</span></p>
               </div>
 
               <p className="mt-4 flex justify-between text-3xl font-bold" data-testid="checkout-summary-total">
                 <span>Total</span>
-                <span className="text-blue-600">${total.toFixed(2)}</span>
+                <span className="text-blue-600">${(orderPreview?.total || 0).toFixed(2)}</span>
               </p>
+
+              {(orderPreview?.item_count || 0) === 0 && (
+                <p className="mt-2 text-sm text-amber-600" data-testid="checkout-empty-cart-note">
+                  Your cart is empty. Add products before checkout.
+                </p>
+              )}
 
               <div className="mt-4 flex gap-2" data-testid="checkout-promo-row">
                 <Input placeholder="Promo code" data-testid="checkout-promo-input" />
@@ -294,7 +320,7 @@ export default function CheckoutPage() {
                 className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700"
                 data-testid="checkout-place-order-button"
                 onClick={placeOrderWithStripe}
-                disabled={isPlacingOrder || !isAuthenticated}
+                disabled={isPlacingOrder || !isAuthenticated || (orderPreview?.item_count || 0) === 0}
               >
                 {isPlacingOrder ? "Processing..." : "Pay with Stripe"}
               </Button>
@@ -303,7 +329,7 @@ export default function CheckoutPage() {
                 className="mt-3 h-12 w-full rounded-full"
                 data-testid="checkout-cod-button"
                 onClick={placeOrderWithCOD}
-                disabled={isPlacingOrder || !isAuthenticated}
+                disabled={isPlacingOrder || !isAuthenticated || (orderPreview?.item_count || 0) === 0}
               >
                 Cash on Delivery
               </Button>

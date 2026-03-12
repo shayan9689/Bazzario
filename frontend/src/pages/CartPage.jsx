@@ -186,10 +186,18 @@ export default function CartPage() {
               </p>
 
               <Link to="/checkout" data-testid="cart-checkout-link">
-                <Button className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700" data-testid="cart-checkout-button" onClick={() => toast.success("Proceeding to checkout") }>
+                <Button
+                  className="mt-4 h-12 w-full rounded-full bg-blue-600 text-white hover:bg-blue-700"
+                  data-testid="cart-checkout-button"
+                  onClick={() => toast.success("Proceeding to checkout") }
+                  disabled={(cart?.item_count || 0) === 0}
+                >
                   Proceed to Checkout
                 </Button>
               </Link>
+              {(cart?.item_count || 0) === 0 && (
+                <p className="mt-2 text-center text-xs text-amber-600" data-testid="cart-empty-warning-text">Add products to continue checkout</p>
+              )}
               <p className="mt-3 text-center text-xs text-zinc-500" data-testid="cart-secure-note">
                 Secure SSL checkout
               </p>

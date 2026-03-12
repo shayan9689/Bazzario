@@ -133,6 +133,11 @@ export function StoreProvider({ children }) {
     return response.data;
   };
 
+  const fetchOrderPreview = async (shippingMethod = "standard") => {
+    const response = await api.get("/orders/preview", { params: { shipping_method: shippingMethod } });
+    return response.data;
+  };
+
   const createStripeCheckoutSession = async (orderId) => {
     const response = await api.post("/payments/checkout/session", {
       order_id: orderId,
@@ -192,6 +197,7 @@ export function StoreProvider({ children }) {
       updateCartQuantity,
       removeCartItem,
       createOrder,
+      fetchOrderPreview,
       createStripeCheckoutSession,
       checkStripeCheckoutStatus,
       updateAccountSettings,

@@ -202,6 +202,15 @@ class OrderListResponse(BaseModel):
     orders: List[Order]
 
 
+class OrderPreviewResponse(BaseModel):
+    item_count: int
+    subtotal: float
+    tax: float
+    shipping_fee: float
+    discount: float
+    total: float
+
+
 class CheckoutSessionCreateRequest(BaseModel):
     order_id: str
     origin_url: str
@@ -727,6 +736,38 @@ async def create_order(payload: CheckoutOrderRequest, current_user: Dict = Depen
         await db.carts.update_one({"id": cart_doc["id"]}, {"$set": {"items": [], "updated_at": utc_now_iso()}})
 
     return Order(**order_doc)
+
+
+@api_router.get("/orders/preview", response_model=OrderPreviewResponse)
+async def get_order_preview(
+    shipping_method: Literal["standard", "express"] = "standard",
+    current_user: Dict = Depends(get_current_user),
+) -> OrderPreviewResponse:
+    cart_doc = await get_or_create_cart(current_user["id"])
+    cart_response = map_cart_response(cart_doc)
+
+    if cart_response.item_count == 0:
+        return OrderPreviewResponse(
+            item_count=0,
+            subtotal=0,
+            tax=0,
+            shipping_fee=0,
+            discount=0,
+            total=0,
+        )
+
+    shipping_fee = 15 if shipping_method == "express" else (0 if cart_response.subtotal >= 100 else 10)
+    discount = 0
+    total = round(cart_response.subtotal + cart_response.tax + shipping_fee - discount, 2)
+
+    return OrderPreviewResponse(
+        item_count=cart_response.item_count,
+        subtotal=cart_response.subtotal,
+        tax=cart_response.tax,
+        shipping_fee=shipping_fee,
+        discount=discount,
+        total=total,
+    )
 
 
 @api_router.get("/orders", response_model=OrderListResponse)
