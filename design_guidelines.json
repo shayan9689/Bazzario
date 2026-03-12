@@ -1,0 +1,149 @@
+{
+  "project_name": "LuxeTech Ecommerce",
+  "design_philosophy": {
+    "theme": "Light Mode (Primary)",
+    "archetype": "Archetype 4: Swiss & High-Contrast (Modernized)",
+    "core_principles": [
+      "Product is Hero: Massive imagery, minimal text.",
+      "Micro-Interactions: Every hover, click, and scroll has feedback.",
+      "Negative Space: 3x standard padding to create luxury feel.",
+      "Asymmetry: Broken grids to avoid 'template' look."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Syne, sans-serif",
+      "body": "DM Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "installation": {
+      "source": "Google Fonts",
+      "import_url": "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,100..1000&family=Syne:wght@400..800&display=swap"
+    },
+    "scale": {
+      "h1": "text-6xl md:text-8xl font-bold tracking-tight",
+      "h2": "text-4xl md:text-6xl font-bold tracking-tight",
+      "h3": "text-2xl md:text-4xl font-semibold",
+      "body_lg": "text-lg md:text-xl font-normal leading-relaxed",
+      "body_base": "text-base font-normal leading-relaxed",
+      "caption": "text-sm font-medium tracking-wide uppercase text-muted-foreground"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "#ffffff",
+      "foreground": "#0a0a0a",
+      "primary": "#000000",
+      "primary_foreground": "#ffffff",
+      "secondary": "#f4f4f5",
+      "secondary_foreground": "#18181b",
+      "accent": "#2563eb",
+      "muted": "#f4f4f5",
+      "border": "#e4e4e7"
+    },
+    "utility_classes": {
+      "bg_subtle": "bg-zinc-50",
+      "text_subtle": "text-zinc-500",
+      "border_subtle": "border-zinc-200"
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "marketing": "grid-cols-1 md:grid-cols-12 gap-y-12 gap-x-8",
+      "product_listing": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12",
+      "dashboard": "grid-cols-1 md:grid-cols-4 gap-6"
+    },
+    "spacing": {
+      "section_padding": "py-24 md:py-32",
+      "container_padding": "px-6 md:px-12",
+      "element_gap": "gap-6"
+    },
+    "container": {
+      "max_width": "max-w-screen-2xl mx-auto"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground h-12 px-8 rounded-full font-medium hover:scale-105 transition-transform duration-200 shadow-lg",
+      "secondary": "bg-secondary text-secondary-foreground h-12 px-8 rounded-full font-medium hover:bg-secondary/80 transition-colors",
+      "outline": "border-2 border-primary text-primary h-12 px-8 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition-all"
+    },
+    "cards": {
+      "product": "group relative bg-transparent border-none overflow-visible",
+      "feature": "bg-zinc-50 p-8 rounded-2xl border border-zinc-100 hover:border-zinc-200 transition-colors"
+    },
+    "inputs": {
+      "default": "h-12 bg-transparent border-b-2 border-zinc-200 rounded-none px-0 focus:border-black transition-colors placeholder:text-zinc-400"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+      "hover": "shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+    },
+    "radius": {
+      "default": "rounded-none",
+      "buttons": "rounded-full",
+      "images": "rounded-xl"
+    },
+    "animation": {
+      "hover_lift": "hover:-translate-y-1 transition-transform duration-300 ease-out",
+      "image_zoom": "group-hover:scale-105 transition-transform duration-700 ease-out",
+      "fade_in": "animate-in fade-in duration-500 slide-in-from-bottom-4"
+    }
+  },
+  "motion_library": {
+    "preferred": "framer-motion",
+    "usage": {
+      "page_transition": "initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}",
+      "stagger_children": "variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}",
+      "smooth_scroll": "lenis"
+    }
+  },
+  "image_urls": {
+    "hero_lifestyle": {
+      "url": "https://images.unsplash.com/photo-1760736534430-ed4a321e108f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwzfHxsaWZlc3R5bGUlMjBmYXNoaW9uJTIwbW9kZWwlMjB1cmJhbiUyMHN0cmVldHdlYXJ8ZW58MHx8fHwxNzczMzUwNTI1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Urban lifestyle model group",
+      "category": "hero"
+    },
+    "product_electronics_1": {
+      "url": "https://images.unsplash.com/photo-1550029402-8280f657d8d1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBtaW5pbWFsJTIwZWxlY3Ryb25pY3MlMjBoZWFkcGhvbmVzJTIwc21hcnR3YXRjaHxlbnwwfHx8fDE3NzMzNTA1MjF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Bose headphones and Apple Watch flatlay",
+      "category": "product"
+    },
+    "product_electronics_2": {
+      "url": "https://images.unsplash.com/photo-1602248145578-9e5bc50c77b3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBtaW5pbWFsJTIwZWxlY3Ryb25pY3MlMjBoZWFkcGhvbmVzJTIwc21hcnR3YXRjaHxlbnwwfHx8fDE3NzMzNTA1MjF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Silver Apple Watch sport band",
+      "category": "product"
+    },
+    "fashion_model_1": {
+      "url": "https://images.unsplash.com/photo-1575633660454-cd44c9538d91?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxsaWZlc3R5bGUlMjBmYXNoaW9uJTIwbW9kZWwlMjB1cmJhbiUyMHN0cmVldHdlYXJ8ZW58MHx8fHwxNzczMzUwNTI1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Woman in beige blouse with bag",
+      "category": "category_card"
+    },
+    "fashion_model_2": {
+      "url": "https://images.unsplash.com/photo-1742822002352-9d16113a81b7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHw0fHxsaWZlc3R5bGUlMjBmYXNoaW9uJTIwbW9kZWwlMjB1cmJhbiUyMHN0cmVldHdlYXJ8ZW58MHx8fHwxNzczMzUwNTI1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Man posing confidently",
+      "category": "category_card"
+    }
+  },
+  "asset_instructions": {
+    "icons": "Use lucide-react for all UI icons (shopping-bag, search, menu, user).",
+    "logo": "Use text logo 'LUXE.' in Syne font, ExtraBold, tracking-tighter."
+  },
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds, use solid colors or subtle noise textures.",
+    "Avoid centering text unless absolutely necessary for balance.",
+    "Use generous padding (py-24, py-32) between sections.",
+    "Ensure all interactive elements have a hover state.",
+    "Use data-testid attributes for all clickable elements.",
+    "Do not use generic 'Inter' for headings. Use 'Syne'.",
+    "Images must have 'object-cover' and be wrapped in overflow-hidden containers for zoom effects."
+  ],
+  "component_instructions": {
+    "header": "Sticky, glassmorphism effect (backdrop-blur-md bg-white/70). Logo left, Nav center, Actions right.",
+    "hero": "Full height (min-h-screen) or large (min-h-[80vh]). Split layout or full background image with overlay.",
+    "product_card": "Minimalist. Image takes 80% of height. Title and price below. No visible button until hover (or subtle icon button).",
+    "footer": "Large typographic footer. 'Syne' font for big links. Multi-column layout for links."
+  }
+}
